@@ -3,6 +3,7 @@ import requests
 import json
 from config import getConfig
 from classes.ip2address import long2ip
+from os import path
 
 class Tasks:
 
@@ -17,7 +18,7 @@ class Tasks:
             return False
 
         self.runingTask = task
-        task.run()
+        task.runTask()
         return True
 
     def clearTask(self):
@@ -28,6 +29,8 @@ class Tasks:
         r = requests.post(config["centerBaseURL"] + "/nodes/" + config["id"] + "/tasks/update")
 
         return ""
+
+pluginsdir = path.abspath(path.join(path.dirname(__file__), "../plugins"))
 
 def getRemoteTask():
     from tasks.task import Task
@@ -52,7 +55,14 @@ def getRemoteTask():
         range = long2ip(task["startIP"])
     plugins = task["plugins"]
 
-    task = Task(id, range, plugins)
+    for plugin in plugins:
+        r = requests.get(config["centerBaseURL"] + "/plugins/" + plugin)
+        plugindata = r.content
+        f = open(path.join(pluginsdir, plugin + ".py"), "w", encoding="utf-8")
+        f.write(plugindata.decode())
+        f.close()
+
+    task = Task(id, range, 0, 65535, plugins)
 
     return task
 

@@ -38,9 +38,6 @@ def ping():
     return "ok"
 
 
-import interfaces.tasks as tasksInterfaces
-
-
 # 通知任务
 @app.route('/tasks', methods=['POST'])
 def task():
