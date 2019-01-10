@@ -10,7 +10,7 @@ from deal_json.store import store_ip_port
 import threading
 import importlib
 # from script.redis_unauth import redis_unauth
-
+import  time
 
 class scanTask():
     def __init__(self, id, ips_all, start_port, end_port, plugins):
@@ -38,7 +38,7 @@ class scanTask():
         self.scanHostCount = len(ips)
         self.scanOverHostCount = 0
         list_Host = []
-        with ThreadPoolExecutor(30) as executor1:
+        with ThreadPoolExecutor(50) as executor1:
             result_list = executor1.map(self.pingIP, ips)
             for result in result_list:
                if(result["result"]):
@@ -55,7 +55,7 @@ class scanTask():
         self.scanOverHostCount = self.scanOverHostCount + 1
         self.progress = self.scanOverHostCount / self.scanHostCount * 0.33 + 0
         self.lock.release()
-        print(str(self.progress))
+        # print(str(self.progress))
         return {
             "ip": ip,
             "result": result
@@ -82,14 +82,14 @@ class scanTask():
         list_hosts_tmp = self.result["hosts"]
         index = 0
 
-        with ThreadPoolExecutor(30) as executor1:
+        with ThreadPoolExecutor(8000) as executor1:
             result_list = executor1.map(self.pingPort, urls)
             for result in result_list:
                 if (result["result"]):
                     self.result["numberOfPorts"] = self.result["numberOfPorts"] + 1
                     for dic_host_tmp in list_hosts_tmp:
                         if(dic_host_tmp["host"] == result["ip"]):
-                            list_port_tmp=[]
+                            list_port_tmp= dic_host_tmp["ports"]
                             dic_host_tmp["numberOfPorts"] = dic_host_tmp["numberOfPorts"] + 1
                             result_port = PortResult(result["port"])
                             list_poty_tmp = dic_host_tmp["ports"]
@@ -103,7 +103,7 @@ class scanTask():
         self.scanOverPortCount = self.scanOverPortCount + 1
         self.progress = self.scanOverPortCount / self.scanPortCount * 0.33 + 0.33
         self.lock.release()
-        print(str(self.progress))
+        # print(str(self.progress))
         return {
             "ip": ipport["ip"],
             "port": ipport["port"],
@@ -136,7 +136,7 @@ class scanTask():
                         if(result["ip"]==host["host"]):
                             host["numberOfWarnings"] = host["numberOfWarnings"] + 1
                             for port in host["ports"]:
-                                list_warn_tmp = []
+                                list_warn_tmp = port["warnings"]
                                 if(port["port"]==result["port"]):
                                     list_warn_tmp = port["warnings"]
                                     list_warn_tmp.append(WarnResult(result["description"], result["plugin"]).add_Warn())
@@ -152,7 +152,7 @@ class scanTask():
             self.lock.acquire()
             self.scanWarnOverCount = self.scanWarnOverCount + 1
             self.progress = self.scanWarnOverCount / self.scanWarnCount * 0.33 + 0.66
-            print(str(self.progress))
+            # print(str(self.progress))
             self.lock.release()
             if(result["result"]):
                 return {
@@ -244,3 +244,11 @@ class WarnResult():
         dict_Warn["description"] = self.description
         dict_Warn["plugin"] = self.plugin
         return dict_Warn
+
+
+
+if __name__ == "__main__":
+    task = scanTask("123", "10.10.9.233", 0, 10000, [])
+    print("start:   " + str(time.time()))
+    task.run()
+    print("end:   " + str(time.time()))
