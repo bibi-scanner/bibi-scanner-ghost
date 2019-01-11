@@ -53,6 +53,8 @@ def getRemoteTask():
     range = long2ip(task["startIP"]) + "-" + long2ip(task["endIP"])
     if task["startIP"] == task["endIP"]:
         range = long2ip(task["startIP"])
+    startPort = task["startPort"]
+    endPort = task["endPort"]
     plugins = task["plugins"]
 
     for plugin in plugins:
@@ -62,7 +64,7 @@ def getRemoteTask():
         f.write(plugindata.decode())
         f.close()
 
-    task = Task(id, range, 0, 65535, plugins)
+    task = Task(id, range, startPort, endPort, plugins)
 
     return task
 

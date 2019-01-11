@@ -67,7 +67,7 @@ class scanTask():
         startPorts = self.start_port
         endPorts = self.end_port
         for host in hosts:
-            for i in range(startPorts, endPorts):
+            for i in range(startPorts, endPorts + 1):
                 urls.append({
                     "ip": host["host"],
                     "port": i
@@ -103,7 +103,7 @@ class scanTask():
         self.scanOverPortCount = self.scanOverPortCount + 1
         self.progress = self.scanOverPortCount / self.scanPortCount * 0.33 + 0.33
         self.lock.release()
-        # print(str(self.progress))
+        print(str(self.progress))
         return {
             "ip": ipport["ip"],
             "port": ipport["port"],
